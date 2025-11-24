@@ -30,7 +30,30 @@ type AppState = {
   filter: Filter;
 };
 
-main();
+export {
+  addTodo,
+  clearCompleted,
+  getVisibleTodos,
+  parseDataAttributes,
+  removeTodo,
+  setFilter,
+  toggleTodo,
+  type AppState,
+  type Filter,
+  type Todo,
+};
+
+if (hasTodoDom()) {
+  main();
+}
+
+function hasTodoDom(): boolean {
+  return (
+    typeof document !== "undefined" &&
+    Boolean(document.querySelector("#todo-list")) &&
+    Boolean(document.querySelector(".empty"))
+  )
+}
 
 function main(): void {
   const appEvents = createEventBus<AppEventMap>();
