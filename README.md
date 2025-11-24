@@ -1,0 +1,1 @@
+參考這篇[文章](https://javascript.plainenglish.io/this-one-abstraction-made-my-frontend-10x-more-maintainable-deea6b95252c)實作 todo list 功能。
