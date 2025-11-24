@@ -284,13 +284,14 @@ function escapeHtml(value: string): string {
 function renderTodoItem(todo: Todo): string {
   const label = todo.completed ? "Undo" : "Done";
   const status = todo.completed ? "is-done" : "";
+  const toggleClass = todo.completed ? "action-btn btn-undo" : "action-btn btn-done";
   return `
     <li class="todo ${status}" data-todo-id="${todo.id}">
-      <button type="button" class="secondary" data-action="toggle-todo" data-todo-id="${todo.id}" aria-pressed="${todo.completed}">
+      <button type="button" class="${toggleClass}" data-action="toggle-todo" data-todo-id="${todo.id}" aria-pressed="${todo.completed}">
         ${label}
       </button>
       <span class="title">${escapeHtml(todo.title)}</span>
-      <button type="button" data-action="remove-todo" data-todo-id="${todo.id}">Delete</button>
+      <button type="button" class="action-btn btn-delete" data-action="remove-todo" data-todo-id="${todo.id}">Delete</button>
     </li>
   `;
 }
