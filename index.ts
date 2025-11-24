@@ -23,19 +23,18 @@ type AppEventMap = {
   "filter:set": { filter: Filter };
 };
 
-type Listener<EventMap> = <E extends keyof EventMap>(
-  payload: EventMap[E]
-) => void | Promise<void>;
+type BusListener<Payload> = (payload: Payload) => void | Promise<void>;
 
 const createEventBus = <EventMap extends Record<string, unknown>>() => {
-  const listeners = new Map<keyof EventMap, Map<string, Listener<EventMap>>>();
+  const listeners = new Map<keyof EventMap, Map<string, BusListener<any>>>();
   let counter = 0;
 
   const on = <E extends keyof EventMap>(
     event: E,
-    listener: Listener<EventMap>
+    listener: BusListener<EventMap[E]>
   ): string => {
-    const bucket = listeners.get(event) ?? new Map<string, Listener<EventMap>>();
+    const bucket =
+      listeners.get(event) ?? new Map<string, BusListener<any>>();
     const id = `${String(event)}:${counter++}`;
     bucket.set(id, listener);
     listeners.set(event, bucket);
@@ -56,7 +55,7 @@ const createEventBus = <EventMap extends Record<string, unknown>>() => {
     const bucket = listeners.get(event);
     if (!bucket) return;
     for (const listener of bucket.values()) {
-      await listener(payload);
+      await (listener as BusListener<EventMap[E]>)(payload);
     }
   };
 
