@@ -1,5 +1,4 @@
 import type { AppState, Filter, Todo } from "./app-types.js";
-export type { AppState, Filter, Todo };
 
 function randomId(): string {
   return typeof crypto !== "undefined" && "randomUUID" in crypto

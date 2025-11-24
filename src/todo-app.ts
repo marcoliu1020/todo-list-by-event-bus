@@ -8,10 +8,8 @@ import {
   removeTodo,
   setFilter,
   toggleTodo,
-  type AppState,
-  type Filter,
 } from "./todo-state.js";
-import type { AppEventMap, DomActionPayload } from "./app-types.js";
+import type { AppEventMap, DomActionPayload, AppState, Filter } from "./app-types.js";
 import type { EventBus } from "./event-bus.js";
 
 export function hasTodoDom(): boolean {
