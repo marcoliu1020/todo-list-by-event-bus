@@ -1,23 +1,58 @@
-const createEventBus = () => {
-  const listeners = new Map();
+type Filter = "all" | "active" | "completed";
+
+type Todo = {
+  id: string;
+  title: string;
+  completed: boolean;
+  createdAt: number;
+};
+
+type DomActionPayload = {
+  action: string;
+  element: HTMLElement;
+  data: Record<string, string>;
+  originalEvent: Event;
+};
+
+type AppEventMap = {
+  "dom:action": DomActionPayload;
+  "todo:add": { title: string };
+  "todo:toggle": { id: string };
+  "todo:remove": { id: string };
+  "todo:clearCompleted": Record<string, never>;
+  "filter:set": { filter: Filter };
+};
+
+type Listener<EventMap> = <E extends keyof EventMap>(
+  payload: EventMap[E]
+) => void | Promise<void>;
+
+const createEventBus = <EventMap extends Record<string, unknown>>() => {
+  const listeners = new Map<keyof EventMap, Map<string, Listener<EventMap>>>();
   let counter = 0;
 
-  const on = (event, listener) => {
-    const bucket = listeners.get(event) ?? new Map();
-    const id = `${event}:${counter++}`;
+  const on = <E extends keyof EventMap>(
+    event: E,
+    listener: Listener<EventMap>
+  ): string => {
+    const bucket = listeners.get(event) ?? new Map<string, Listener<EventMap>>();
+    const id = `${String(event)}:${counter++}`;
     bucket.set(id, listener);
     listeners.set(event, bucket);
     return id;
   };
 
-  const off = (event, listenerId) => {
+  const off = <E extends keyof EventMap>(event: E, listenerId: string): void => {
     const bucket = listeners.get(event);
     if (!bucket) return;
     bucket.delete(listenerId);
     if (!bucket.size) listeners.delete(event);
   };
 
-  const emit = async (event, payload) => {
+  const emit = async <E extends keyof EventMap>(
+    event: E,
+    payload: EventMap[E]
+  ): Promise<void> => {
     const bucket = listeners.get(event);
     if (!bucket) return;
     for (const listener of bucket.values()) {
@@ -28,27 +63,29 @@ const createEventBus = () => {
   return { on, off, emit };
 };
 
-const appEvents = createEventBus();
+const appEvents = createEventBus<AppEventMap>();
 
-const parseDataAttributes = (element) =>
-  Array.from(element.attributes).reduce((acc, attr) => {
+const parseDataAttributes = (element: HTMLElement): Record<string, string> =>
+  Array.from(element.attributes).reduce<Record<string, string>>((acc, attr) => {
     if (!attr.name.startsWith("data-") || attr.name === "data-action") {
       return acc;
     }
     const key = attr.name
       .slice(5)
-      .replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
+      .replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase());
     return { ...acc, [key]: attr.value };
   }, {});
 
-const handleDataAction = (element, event) => {
+const handleDataAction = (element: HTMLElement, event: Event): void => {
   const action = element.dataset.action;
   if (!action) return;
-  if (event.type === "submit") event.preventDefault();
+  if (event.type === "submit") {
+    event.preventDefault();
+  }
 
   const data = parseDataAttributes(element);
 
-  appEvents.emit("dom:action", {
+  void appEvents.emit("dom:action", {
     action,
     element,
     data,
@@ -56,19 +93,21 @@ const handleDataAction = (element, event) => {
   });
 };
 
-const createDelegatedHandler = (handler) => (event) => {
-  const target = event.target;
-  if (!(target instanceof HTMLElement)) return;
-  const actionable = target.closest("[data-action]");
-  if (!actionable) return;
-  handler(actionable, event);
-};
+const createDelegatedHandler =
+  (handler: (element: HTMLElement, event: Event) => void): EventListener =>
+  (event: Event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLElement)) return;
+    const actionable = target.closest<HTMLElement>("[data-action]");
+    if (!actionable) return;
+    handler(actionable, event);
+  };
 
-const setupDOMListeners = (dependencies) => {
+const setupDOMListeners = (dependencies: { document: Document }) => {
   const { document } = dependencies;
-  const handlers = new Map();
+  const handlers = new Map<string, EventListener>();
 
-  const bind = (type, listener) => {
+  const bind = (type: string, listener: EventListener) => {
     document.addEventListener(type, listener);
     handlers.set(type, listener);
   };
@@ -84,43 +123,46 @@ const setupDOMListeners = (dependencies) => {
   };
 };
 
-const randomId = () =>
-  typeof crypto !== "undefined" && crypto.randomUUID
+const randomId = (): string =>
+  typeof crypto !== "undefined" && "randomUUID" in crypto
     ? crypto.randomUUID()
     : `id-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
-const createTodo = (title) => ({
+const createTodo = (title: string): Todo => ({
   id: randomId(),
   title,
   completed: false,
   createdAt: Date.now(),
 });
 
-const addTodo = (state, title) => ({
+const addTodo = (state: AppState, title: string): AppState => ({
   ...state,
   todos: [...state.todos, createTodo(title)],
 });
 
-const toggleTodo = (state, id) => ({
+const toggleTodo = (state: AppState, id: string): AppState => ({
   ...state,
   todos: state.todos.map((todo) =>
     todo.id === id ? { ...todo, completed: !todo.completed } : todo
   ),
 });
 
-const removeTodo = (state, id) => ({
+const removeTodo = (state: AppState, id: string): AppState => ({
   ...state,
   todos: state.todos.filter((todo) => todo.id !== id),
 });
 
-const clearCompleted = (state) => ({
+const clearCompleted = (state: AppState): AppState => ({
   ...state,
   todos: state.todos.filter((todo) => !todo.completed),
 });
 
-const setFilter = (state, filter) => ({ ...state, filter });
+const setFilter = (state: AppState, filter: Filter): AppState => ({
+  ...state,
+  filter,
+});
 
-const getVisibleTodos = (state) => {
+const getVisibleTodos = (state: AppState): Todo[] => {
   switch (state.filter) {
     case "active":
       return state.todos.filter((todo) => !todo.completed);
@@ -131,7 +173,7 @@ const getVisibleTodos = (state) => {
   }
 };
 
-const escapeHtml = (value) =>
+const escapeHtml = (value: string): string =>
   value
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
@@ -139,7 +181,7 @@ const escapeHtml = (value) =>
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#039;");
 
-const renderTodoItem = (todo) => {
+const renderTodoItem = (todo: Todo): string => {
   const label = todo.completed ? "Undo" : "Done";
   const status = todo.completed ? "is-done" : "";
   return `
@@ -153,21 +195,30 @@ const renderTodoItem = (todo) => {
   `;
 };
 
-const createRenderer = (root) => {
-  const listEl = root.querySelector("#todo-list");
-  const emptyEl = root.querySelector(".empty");
+type AppState = {
+  todos: Todo[];
+  filter: Filter;
+};
+
+const createRenderer = (root: Document) => {
+  const listEl = root.querySelector<HTMLUListElement>("#todo-list");
+  const emptyEl = root.querySelector<HTMLElement>(".empty");
   const filterButtons = Array.from(
-    root.querySelectorAll('[data-action="set-filter"]')
+    root.querySelectorAll<HTMLButtonElement>('[data-action="set-filter"]')
   );
 
-  const setFilterState = (filter) => {
+  if (!listEl || !emptyEl) {
+    throw new Error("Todo list elements not found in DOM.");
+  }
+
+  const setFilterState = (filter: Filter) => {
     filterButtons.forEach((btn) => {
       const isActive = btn.dataset.filter === filter;
       btn.setAttribute("aria-pressed", String(isActive));
     });
   };
 
-  return (state) => {
+  return (state: AppState) => {
     const visible = getVisibleTodos(state);
     listEl.innerHTML = visible.map(renderTodoItem).join("");
     const hasTodos = Boolean(visible.length);
@@ -176,12 +227,12 @@ const createRenderer = (root) => {
   };
 };
 
-const bootstrap = () => {
+const bootstrap = (): void => {
   const root = document;
   const render = createRenderer(root);
-  let appState = { todos: [], filter: "all" };
+  let appState: AppState = { todos: [], filter: "all" };
 
-  const updateState = (updater) => {
+  const updateState = (updater: (state: AppState) => AppState): void => {
     appState = updater(appState);
     render(appState);
   };
@@ -202,37 +253,40 @@ const bootstrap = () => {
     updateState((state) => setFilter(state, filter))
   );
 
-  const actionHandlers = new Map();
+  const actionHandlers = new Map<
+    string,
+    (payload: DomActionPayload) => void
+  >();
 
   actionHandlers.set("add-todo", ({ element }) => {
     if (!(element instanceof HTMLFormElement)) return;
     const formData = new FormData(element);
     const title = (formData.get("title") || "").toString().trim();
     if (!title) return;
-    appEvents.emit("todo:add", { title });
+    void appEvents.emit("todo:add", { title });
     element.reset();
   });
 
   actionHandlers.set("toggle-todo", ({ element }) => {
     const id = element.dataset.todoId;
     if (!id) return;
-    appEvents.emit("todo:toggle", { id });
+    void appEvents.emit("todo:toggle", { id });
   });
 
   actionHandlers.set("remove-todo", ({ element }) => {
     const id = element.dataset.todoId;
     if (!id) return;
-    appEvents.emit("todo:remove", { id });
+    void appEvents.emit("todo:remove", { id });
   });
 
   actionHandlers.set("set-filter", ({ element }) => {
-    const filter = element.dataset.filter;
+    const filter = element.dataset.filter as Filter | undefined;
     if (!filter) return;
-    appEvents.emit("filter:set", { filter });
+    void appEvents.emit("filter:set", { filter });
   });
 
   actionHandlers.set("clear-completed", () => {
-    appEvents.emit("todo:clearCompleted", {});
+    void appEvents.emit("todo:clearCompleted", {});
   });
 
   appEvents.on("dom:action", (payload) => {
