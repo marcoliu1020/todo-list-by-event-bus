@@ -6,154 +6,156 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Eventful Todo List</title>
   <style>
-  :root {
-    font-family: "Segoe UI", sans-serif;
-    background: #0f172a;
-    color: #e2e8f0;
-  }
+    :root {
+      font-family: "Segoe UI", sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+    }
 
-  *, *::before, *::after {
-    box-sizing: border-box;
-  }
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
 
-  body {
-    margin: 0;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    padding: 24px 0 32px;
-    min-height: 100vh;
-  }
+    body {
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 24px 0 32px;
+      min-height: 100vh;
+    }
 
-  .app {
-    width: min(720px, 90vw);
-    background: #0b1221;
-    border: 1px solid #1e293b;
-    border-radius: 16px;
-    padding: 24px;
-    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.4);
-  }
+    .app {
+      width: min(720px, 90vw);
+      background: #0b1221;
+      border: 1px solid #1e293b;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.4);
+    }
 
-  h1 {
-    margin: 0 0 8px;
-    letter-spacing: 0.4px;
-  }
+    h1 {
+      margin: 0 0 8px;
+      letter-spacing: 0.4px;
+    }
 
-  p.lead {
-    margin: 0 0 24px;
-    color: #94a3b8;
-  }
+    p.lead {
+      margin: 0 0 24px;
+      color: #94a3b8;
+    }
 
-  form {
-    display: flex;
-    gap: 12px;
-    margin-bottom: 12px;
-  }
+    form {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
 
-  input[type="text"] {
-    flex: 1;
-    padding: 12px 14px;
-    border-radius: 10px;
-    border: 1px solid #1f2937;
-    background: #0f172a;
-    color: #e2e8f0;
-  }
+    input[type="text"] {
+      flex: 1;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1px solid #1f2937;
+      background: #0f172a;
+      color: #e2e8f0;
+    }
 
-  button {
-    border: 1px solid #1f2937;
-    border-radius: 10px;
-    padding: 12px 14px;
-    background: linear-gradient(120deg, #22d3ee, #3b82f6);
-    color: #0b1221;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 140ms ease, color 140ms ease, border-color 140ms ease, box-shadow 140ms ease;
-  }
+    button {
+      border: 1px solid #1f2937;
+      border-radius: 10px;
+      padding: 12px 14px;
+      background: linear-gradient(120deg, #22d3ee, #3b82f6);
+      color: #0b1221;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 140ms ease, color 140ms ease, border-color 140ms ease, box-shadow 140ms ease;
+    }
 
-  button.secondary {
-    background: #1e293b;
-    color: #e2e8f0;
-  }
+    button.secondary {
+      background: #1e293b;
+      color: #e2e8f0;
+    }
 
-  .toolbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px;
-    flex-wrap: wrap;
-    margin: 12px 0 16px;
-  }
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin: 12px 0 16px;
+    }
 
-  .filters {
-    display: flex;
-    gap: 8px;
-  }
+    .filters {
+      display: flex;
+      gap: 8px;
+    }
 
-  .filters button {
-    background: #111827;
-    color: #cbd5e1;
-    border-color: #1f2937;
-    min-width: 96px;
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
-  }
+    .filters button {
+      background: #111827;
+      color: #cbd5e1;
+      border-color: #1f2937;
+      min-width: 96px;
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+    }
 
-  .filters button[aria-pressed="true"] {
-    background: linear-gradient(120deg, #22d3ee, #3b82f6);
-    color: #0b1221;
-    border-color: #22d3ee;
-    box-shadow: 0 8px 24px rgba(34, 211, 238, 0.25);
-  }
+    .filters button[aria-pressed="true"] {
+      background: linear-gradient(120deg, #22d3ee, #3b82f6);
+      color: #0b1221;
+      border-color: #22d3ee;
+      box-shadow: 0 8px 24px rgba(34, 211, 238, 0.25);
+    }
 
-  .list-area {
-    position: relative;
-    background: #0b1221;
-    border: 1px solid #1e293b;
-    border-radius: 12px;
-    padding: 10px;
-    min-height: 260px;
-    max-height: 70vh;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
+    .list-area {
+      position: relative;
+      background: #0b1221;
+      border: 1px solid #1e293b;
+      border-radius: 12px;
+      padding: 10px;
+      min-height: 260px;
+      max-height: 70vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
 
-  ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: grid;
-    gap: 8px;
-    overflow-y: auto;
-    padding-right: 4px;
-  }
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: grid;
+      gap: 8px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
 
-  li.todo {
-    display: grid;
-    grid-template-columns: auto 1fr auto;
-    align-items: center;
-    gap: 12px;
-    padding: 12px;
-    background: #0f172a;
-    border: 1px solid #1e293b;
-    border-radius: 12px;
-  }
+    li.todo {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      background: #0f172a;
+      border: 1px solid #1e293b;
+      border-radius: 12px;
+    }
 
-  .todo .title {
-    color: #e2e8f0;
-  }
+    .todo .title {
+      color: #e2e8f0;
+    }
 
-  .todo.is-done .title {
-    color: #94a3b8;
-    text-decoration: line-through;
-  }
+    .todo.is-done .title {
+      color: #94a3b8;
+      text-decoration: line-through;
+    }
 
-  .empty {
-    text-align: center;
-    color: #64748b;
-    padding: 12px 0;
-  }
+    .empty {
+      text-align: center;
+      color: #64748b;
+      padding: 12px 0;
+    }
   </style>
 </head>
 
@@ -175,8 +177,10 @@
       <div class="toolbar">
         <div class="filters">
           <button type="button" data-action="set-filter" data-filter="all" aria-pressed="true">All</button>
-          <button type="button" data-action="set-filter" data-filter="active" aria-pressed="false" class="secondary">Active</button>
-          <button type="button" data-action="set-filter" data-filter="completed" aria-pressed="false" class="secondary">Completed</button>
+          <button type="button" data-action="set-filter" data-filter="active" aria-pressed="false"
+            class="secondary">Active</button>
+          <button type="button" data-action="set-filter" data-filter="completed" aria-pressed="false"
+            class="secondary">Completed</button>
         </div>
         <button type="button" class="secondary" data-action="clear-completed">Clear completed</button>
       </div>
@@ -189,6 +193,6 @@
   </main>
 </body>
 
-<script src="index.js"></script>
+<script type="module" src="dist/index.js"></script>
 
 </html>
