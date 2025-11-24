@@ -4,8 +4,7 @@
   "description": "A todo list built with event-driven architecture",
   "scripts": {
     "build": "tsc",
-    "watch": "tsc --watch",
-    "dev": "tsc && open index.html"
+    "dev": "tsc --watch"
   },
   "devDependencies": {
     "typescript": "^5.3.3"
