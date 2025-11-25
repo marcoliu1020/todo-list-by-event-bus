@@ -20,43 +20,6 @@ export function hasTodoDom(): boolean {
   );
 }
 
-function createActionHandlers(appEvents: EventBus<AppEventMap>) {
-  const actionHandlers = new Map<string, (payload: DomActionPayload) => void>();
-
-  actionHandlers.set("add-todo", ({ element }) => {
-    if (!(element instanceof HTMLFormElement)) return;
-    const formData = new FormData(element);
-    const title = (formData.get("title") || "").toString().trim();
-    if (!title) return;
-    void appEvents.emit("todo:add", { title });
-    element.reset();
-  });
-
-  actionHandlers.set("toggle-todo", ({ element }) => {
-    const id = element.dataset.todoId;
-    if (!id) return;
-    void appEvents.emit("todo:toggle", { id });
-  });
-
-  actionHandlers.set("remove-todo", ({ element }) => {
-    const id = element.dataset.todoId;
-    if (!id) return;
-    void appEvents.emit("todo:remove", { id });
-  });
-
-  actionHandlers.set("set-filter", ({ element }) => {
-    const filter = element.dataset.filter as Filter | undefined;
-    if (!filter) return;
-    void appEvents.emit("filter:set", { filter });
-  });
-
-  actionHandlers.set("clear-completed", () => {
-    void appEvents.emit("todo:clearCompleted", {});
-  });
-
-  return actionHandlers;
-}
-
 export function main(rootDocument: Document = document): void {
   const appEvents = createEventBus<AppEventMap>();
   const render = createRenderer(rootDocument);
@@ -96,4 +59,41 @@ export function main(rootDocument: Document = document): void {
   );
 
   render(appState);
+}
+
+function createActionHandlers(appEvents: EventBus<AppEventMap>) {
+  const actionHandlers = new Map<string, (payload: DomActionPayload) => void>();
+
+  actionHandlers.set("add-todo", ({ element }) => {
+    if (!(element instanceof HTMLFormElement)) return;
+    const formData = new FormData(element);
+    const title = (formData.get("title") || "").toString().trim();
+    if (!title) return;
+    void appEvents.emit("todo:add", { title });
+    element.reset();
+  });
+
+  actionHandlers.set("toggle-todo", ({ element }) => {
+    const id = element.dataset.todoId;
+    if (!id) return;
+    void appEvents.emit("todo:toggle", { id });
+  });
+
+  actionHandlers.set("remove-todo", ({ element }) => {
+    const id = element.dataset.todoId;
+    if (!id) return;
+    void appEvents.emit("todo:remove", { id });
+  });
+
+  actionHandlers.set("set-filter", ({ element }) => {
+    const filter = element.dataset.filter as Filter | undefined;
+    if (!filter) return;
+    void appEvents.emit("filter:set", { filter });
+  });
+
+  actionHandlers.set("clear-completed", () => {
+    void appEvents.emit("todo:clearCompleted", {});
+  });
+
+  return actionHandlers;
 }
