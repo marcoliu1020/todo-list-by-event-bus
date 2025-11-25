@@ -25,6 +25,23 @@ describe("todo state", () => {
     expect(baseState.todos).toHaveLength(0);
   });
 
+  test("adds a todo with transform", () => {
+    const updated = addTodoAndTransform(
+      baseState,
+      "Review PR",
+      (todo) => ({ ...todo, completed: true })
+    );
+
+    expect(updated.todos).toHaveLength(1);
+    expect(updated.todos[0]).toMatchObject({
+      title: "Review PR",
+      completed: true,
+    });
+    expect(updated.todos[0].id).toBeTruthy();
+    expect(updated.todos[0].createdAt).toBeTruthy();
+    expect(baseState.todos).toHaveLength(0);
+  });
+
   test("toggles a todo by id", () => {
     const withTodo = addTodo(baseState, "Ship feature");
     const id = withTodo.todos[0]?.id as string;
