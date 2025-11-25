@@ -4,12 +4,14 @@
   "description": "A todo list built with event-driven architecture",
   "scripts": {
     "build": "tsc",
-    "dev": "tsc --watch",
+    "dev": "tsx --watch",
+    "serve": "npx http-server",
     "test": "vitest"
   },
   "devDependencies": {
     "@types/jsdom": "^27.0.0",
     "@types/node": "^24.10.1",
+    "http-server": "^14.1.1",
     "jsdom": "^27.2.0",
     "typescript": "^5.3.3",
     "vitest": "^4.0.13"
