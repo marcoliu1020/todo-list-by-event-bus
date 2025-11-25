@@ -82,7 +82,7 @@ describe("todo state", () => {
 });
 
 describe("parseDataAttributes", () => {
-  test("converts dashed data attributes to camelCase keys and ignores data-action", () => {
+  test("converts HTML 'data-' attributes to camelCase keys and ignores data-action", () => {
     const button = document.createElement("button");
     button.setAttribute("data-action", "toggle-todo");
     button.setAttribute("data-todo-id", "123");
