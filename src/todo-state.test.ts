@@ -1,15 +1,13 @@
 import { describe, expect, test } from "vitest";
+import type { AppState } from "./app-types";
 import {
-  addTodo,
-  clearCompleted,
-  getVisibleTodos,
-  parseDataAttributes,
-  parseDataAttributesWithoutAction,
-  removeTodo,
-  setFilter,
-  toggleTodo,
-  type AppState,
-} from "./index";
+    addTodo,
+    clearCompleted,
+    getVisibleTodos,
+    removeTodo,
+    setFilter,
+    toggleTodo,
+} from "./todo-state";
 
 describe("todo state", () => {
   const baseState: AppState = { todos: [], filter: "all" };
@@ -42,11 +40,13 @@ describe("todo state", () => {
       (state, title) => addTodo(state, title),
       baseState
     );
+    
     const removeId = withTodos.todos[0]?.id as string;
-
     const remaining = removeTodo(withTodos, removeId);
-    expect(remaining.todos.map((t) => t.title)).toEqual(["Second"]);
+    
     expect(withTodos.todos).toHaveLength(2);
+    expect(remaining.todos).toHaveLength(1);
+    expect(remaining.todos.map((t) => t.title)).toEqual(["Second"]);
   });
 
   test("clears completed todos", () => {
@@ -79,32 +79,5 @@ describe("todo state", () => {
     const updated = setFilter(baseState, "completed");
     expect(updated.filter).toBe("completed");
     expect(baseState.filter).toBe("all");
-  });
-});
-
-describe("parseDataAttributes", () => {
-  test("converts HTML 'data-' attributes to camelCase keys and includes data-action", () => {
-    const button = document.createElement("button");
-    button.setAttribute("data-action", "toggle-todo");
-    button.setAttribute("data-todo-id", "123");
-    button.setAttribute("data-created-at", "today");
-
-    expect(parseDataAttributes(button)).toEqual({
-      action: "toggle-todo",
-      todoId: "123",
-      createdAt: "today",
-    });
-  });
-
-  test("converts HTML 'data-' attributes to camelCase keys and ignores data-action (withoutAction)", () => {
-    const button = document.createElement("button");
-    button.setAttribute("data-action", "toggle-todo");
-    button.setAttribute("data-todo-id", "123");
-    button.setAttribute("data-created-at", "today");
-
-    expect(parseDataAttributesWithoutAction(button)).toEqual({
-      todoId: "123",
-      createdAt: "today",
-    });
   });
 });
