@@ -1,12 +1,13 @@
 import { describe, expect, test } from "vitest";
 import type { AppState } from "./app-types";
 import {
-    addTodo,
-    clearCompleted,
-    getVisibleTodos,
-    removeTodo,
-    setFilter,
-    toggleTodo,
+  addTodo,
+  addTodoAndTransform,
+  clearCompleted,
+  getVisibleTodos,
+  removeTodo,
+  setFilter,
+  toggleTodo,
 } from "./todo-state";
 
 describe("todo state", () => {
@@ -40,10 +41,10 @@ describe("todo state", () => {
       (state, title) => addTodo(state, title),
       baseState
     );
-    
+
     const removeId = withTodos.todos[0]?.id as string;
     const remaining = removeTodo(withTodos, removeId);
-    
+
     expect(withTodos.todos).toHaveLength(2);
     expect(remaining.todos).toHaveLength(1);
     expect(remaining.todos.map((t) => t.title)).toEqual(["Second"]);
@@ -58,13 +59,14 @@ describe("todo state", () => {
   });
 
   test("filters visible todos", () => {
-    const prepared = ["Active task", "Done task"].reduce(
-      (state, title, index) => {
-        const next = addTodo(state, title);
-        return index === 1 ? toggleTodo(next, next.todos[1]!.id) : next;
-      },
-      baseState
-    );
+    const prepared = [
+      (s: AppState) => addTodo(s, "Active task"),
+      (s: AppState) => addTodoAndTransform(
+        s,
+        "Done task",
+        (todo) => ({ ...todo, completed: true, })
+      ),
+    ].reduce((s, fn) => fn(s), baseState);
 
     expect(getVisibleTodos({ ...prepared, filter: "all" })).toHaveLength(2);
     expect(getVisibleTodos({ ...prepared, filter: "active" })).toEqual([

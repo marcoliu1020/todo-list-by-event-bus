@@ -22,6 +22,18 @@ export function addTodo(state: AppState, title: string): AppState {
   };
 }
 
+export function addTodoAndTransform(
+  state: AppState,
+  title: string,
+  transform: (todo: Todo) => Todo
+): AppState {
+  const newTodo = createTodo(title);
+  return {
+    ...state,
+    todos: [...state.todos, transform(newTodo)],
+  };
+}
+
 export function toggleTodo(state: AppState, id: string): AppState {
   return {
     ...state,
