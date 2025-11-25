@@ -12,7 +12,7 @@ export function parseDataAttributes(element: HTMLElement): Record<string, string
   );
 }
 
-function parseDataAttributesWithoutAction(element: HTMLElement): Record<string, string> {
+export function parseDataAttributesWithoutAction(element: HTMLElement): Record<string, string> {
   const { action: _action, ...rest } = parseDataAttributes(element);
   return rest;
 }
