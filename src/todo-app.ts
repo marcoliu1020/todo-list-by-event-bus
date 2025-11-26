@@ -22,18 +22,21 @@ export function hasTodoDom(): boolean {
 export function main(rootDocument: Document = document): void {
   const appEvents = createEventBus<AppEventMap>();
   const render = createRenderer(rootDocument);
-  
+
   // app state
   const useAppState = createAppState()
   const { getState, setState } = useAppState()
 
-  const updateState = (updater: (state: AppState) => AppState): void => {
-    const appState = updater(getState());
-    setState(appState)
-    render(appState);
-  };
+  appStateEventListeners(
+    appEvents,
+    getState,
+    onChangeAppState
+  );
 
-  appStateEventListeners(appEvents, updateState);
+  function onChangeAppState(state: AppState): void {
+    setState(state)
+    render(state);
+  };
 
   const actionHandlers = createActionHandlers(appEvents);
 
@@ -61,23 +64,29 @@ function createAppState(appState: AppState = { todos: [], filter: "all" }) {
 
 function appStateEventListeners(
   appEvents: EventBus<AppEventMap>,
-  updateState: (updater: (state: AppState) => AppState) => void
+  getState: () => AppState,
+  onChange: (state: AppState) => void
 ): void {
-  appEvents.on("todo:add", ({ title }) =>
-    updateState((state) => addTodo(state, title))
-  );
-  appEvents.on("todo:toggle", ({ id }) =>
-    updateState((state) => toggleTodo(state, id))
-  );
-  appEvents.on("todo:remove", ({ id }) =>
-    updateState((state) => removeTodo(state, id))
-  );
-  appEvents.on("todo:clearCompleted", () =>
-    updateState((state) => clearCompleted(state))
-  );
-  appEvents.on("filter:set", ({ filter }) =>
-    updateState((state) => setFilter(state, filter))
-  );
+  appEvents.on("todo:add", ({ title }) => {
+    const appState = addTodo(getState(), title)
+    onChange(appState)
+  });
+  appEvents.on("todo:toggle", ({ id }) => {
+    const appState = toggleTodo(getState(), id)
+    onChange(appState)
+  });
+  appEvents.on("todo:remove", ({ id }) => {
+    const appState = removeTodo(getState(), id)
+    onChange(appState)
+  });
+  appEvents.on("todo:clearCompleted", () => {
+    const appState = clearCompleted(getState())
+    onChange(appState)
+  });
+  appEvents.on("filter:set", ({ filter }) => {
+    const appState = setFilter(getState(), filter)
+    onChange(appState)
+  });
 }
 
 function createDataActionHandler(appEvents: EventBus<AppEventMap>) {
