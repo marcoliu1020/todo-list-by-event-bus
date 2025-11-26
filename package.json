@@ -4,7 +4,7 @@
   "description": "A todo list built with event-driven architecture",
   "scripts": {
     "build": "tsc",
-    "dev": "tsx --watch",
+    "dev": "tsc --watch",
     "serve": "npx http-server",
     "test": "vitest"
   },
