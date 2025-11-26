@@ -22,14 +22,18 @@ export function hasTodoDom(): boolean {
 export function main(rootDocument: Document = document): void {
   const appEvents = createEventBus<AppEventMap>();
   const render = createRenderer(rootDocument);
-  let appState: AppState = { todos: [], filter: "all" };
+  
+  // app state
+  const useAppState = createAppState()
+  const { getState, setState } = useAppState()
 
   const updateState = (updater: (state: AppState) => AppState): void => {
-    appState = updater(appState);
+    const appState = updater(getState());
+    setState(appState)
     render(appState);
   };
 
-  setupStateEventListeners(appEvents, updateState);
+  appStateEventListeners(appEvents, updateState);
 
   const actionHandlers = createActionHandlers(appEvents);
 
@@ -43,10 +47,19 @@ export function main(rootDocument: Document = document): void {
   rootDocument.addEventListener("click", dataActionHandler);
   rootDocument.addEventListener("submit", dataActionHandler);
 
-  render(appState);
+  render(getState());
 }
 
-function setupStateEventListeners(
+function createAppState(appState: AppState = { todos: [], filter: "all" }) {
+  return function useAppState() {
+    return {
+      getState: () => appState,
+      setState: (nextState: AppState) => appState = nextState
+    }
+  }
+}
+
+function appStateEventListeners(
   appEvents: EventBus<AppEventMap>,
   updateState: (updater: (state: AppState) => AppState) => void
 ): void {
