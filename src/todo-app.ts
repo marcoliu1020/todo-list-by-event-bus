@@ -29,6 +29,27 @@ export function main(rootDocument: Document = document): void {
     render(appState);
   };
 
+  setupStateEventListeners(appEvents, updateState);
+
+  const actionHandlers = createActionHandlers(appEvents);
+
+  appEvents.on("dom:action", (payload: DomActionPayload) => {
+    const handler = actionHandlers.get(payload.action);
+    if (handler) handler(payload);
+  });
+
+  const dataActionHandler = createDataActionHandler(appEvents);
+
+  rootDocument.addEventListener("click", dataActionHandler);
+  rootDocument.addEventListener("submit", dataActionHandler);
+
+  render(appState);
+}
+
+function setupStateEventListeners(
+  appEvents: EventBus<AppEventMap>,
+  updateState: (updater: (state: AppState) => AppState) => void
+): void {
   appEvents.on("todo:add", ({ title }) =>
     updateState((state) => addTodo(state, title))
   );
@@ -44,20 +65,6 @@ export function main(rootDocument: Document = document): void {
   appEvents.on("filter:set", ({ filter }) =>
     updateState((state) => setFilter(state, filter))
   );
-
-  const actionHandlers = createActionHandlers(appEvents);
-
-  appEvents.on("dom:action", (payload: DomActionPayload) => {
-    const handler = actionHandlers.get(payload.action);
-    if (handler) handler(payload);
-  });
-
-  const dataActionHandler = createDataActionHandler(appEvents);
-
-  rootDocument.addEventListener("click", dataActionHandler);
-  rootDocument.addEventListener("submit", dataActionHandler);
-
-  render(appState);
 }
 
 function createDataActionHandler(appEvents: EventBus<AppEventMap>) {
