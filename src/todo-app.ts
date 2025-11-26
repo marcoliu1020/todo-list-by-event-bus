@@ -90,7 +90,7 @@ function appStateEventListeners(
 }
 
 function createDataActionHandler(appEvents: EventBus<AppEventMap>) {
-  return (event: Event): void => {
+  return function (event: Event): void {
     const target = event.target;
     if (!(target instanceof HTMLElement)) return;
     const actionElement = target.closest<HTMLElement>("[data-action]");
