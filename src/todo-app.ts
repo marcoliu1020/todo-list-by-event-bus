@@ -1,7 +1,6 @@
 import { createEventBus } from "./event-bus.js";
 import { createRenderer } from "./renderer.js";
 import { handleDataAction } from "./data-actions.js";
-import { setupDOMListeners } from "./dom-listeners.js";
 import {
   addTodo,
   clearCompleted,
@@ -53,12 +52,22 @@ export function main(rootDocument: Document = document): void {
     if (handler) handler(payload);
   });
 
-  setupDOMListeners(
-    { document: rootDocument },
-    (element, event) => void handleDataAction(appEvents, element, event)
-  );
+  const dataActionHandler = createDataActionHandler(appEvents);
+
+  rootDocument.addEventListener("click", dataActionHandler);
+  rootDocument.addEventListener("submit", dataActionHandler);
 
   render(appState);
+}
+
+function createDataActionHandler(appEvents: EventBus<AppEventMap>) {
+  return (event: Event): void => {
+    const target = event.target;
+    if (!(target instanceof HTMLElement)) return;
+    const actionElement = target.closest<HTMLElement>("[data-action]");
+    if (!actionElement) return;
+    handleDataAction(appEvents, actionElement, event);
+  };
 }
 
 function createActionHandlers(appEvents: EventBus<AppEventMap>) {
